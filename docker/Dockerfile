@@ -9,16 +9,21 @@ RUN sed -i -e 's/^mirrorlist/#mirrorlist/' \
     && dnf clean all \
     && ssh-keygen -A
 
+# ACCOUNT is only a build arg (not in the runtime env, as on G100); it is stored in ~/.ch_acc.def
 # USERNAME comes from inventory.local.yml (see Makefile); ACCOUNT is a fake CINECA project name
 ARG USERNAME
 ARG ACCOUNT=test_account
 RUN test -n "$USERNAME" \
     && mkdir -p /g100/home/userexternal \
     && useradd -m -p '*' -s /bin/bash -d /g100/home/userexternal/$USERNAME $USERNAME \
+    && echo "$ACCOUNT" > /g100/home/userexternal/$USERNAME/.ch_acc.def \
+    && chown $USERNAME: /g100/home/userexternal/$USERNAME/.ch_acc.def \
     && mkdir -p /g100_work/$ACCOUNT /g100_scratch/userexternal/$USERNAME \
     && chown $USERNAME: /g100_work/$ACCOUNT /g100_scratch/userexternal/$USERNAME \
     && printf 'export WORK=/g100_work/%s\nexport CINECA_SCRATCH=/g100_scratch/userexternal/%s\n' \
         "$ACCOUNT" "$USERNAME" > /etc/profile.d/cineca.sh
+
+WORKDIR /g100/home/userexternal/$USERNAME
 
 COPY entrypoint.sh /entrypoint.sh
 ENV USERNAME=$USERNAME
