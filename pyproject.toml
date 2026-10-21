@@ -1,0 +1,10 @@
+[project]
+name = "centos-nextflow-ansible"
+version = "0.0.0"
+description = "Ansible environment for user-level HPC setup (Nextflow, SDKMAN, Miniconda)"
+requires-python = ">=3.10,<3.13"
+# 2.16 is the last ansible-core supporting Python 3.6 targets (G100 has 3.6.8)
+dependencies = ["ansible-core>=2.16,<2.17"]
+
+[tool.uv]
+package = false

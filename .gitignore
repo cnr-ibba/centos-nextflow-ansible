@@ -2,3 +2,4 @@
 host_vars/*
 !host_vars/*.example
 inventory.local.yml
+.venv/

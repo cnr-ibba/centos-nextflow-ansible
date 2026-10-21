@@ -3,7 +3,7 @@
 ## Purpose
 User-level Ansible playbook that configures a user's `$HOME` on a CentOS 8.x HPC cluster (target: CINECA Galileo100) with: dotfiles, SDKMAN + Java, Nextflow, Miniconda and the related environment variables, following https://bioinfo-guidelines.readthedocs.io (Nextflow, SLURM and Conda sections).
 
-**Success criterion:** `ansible-playbook site.yml --check --diff -l g100` against one's own G100 user must report `changed=0`. Every run after the first must also report `changed=0` in non-check mode.
+**Success criterion:** `uv run ansible-playbook site.yml --check --diff -l g100` against one's own G100 user must report `changed=0`. Every run after the first must also report `changed=0` in non-check mode.
 
 The repo starts from the `acch/ansible-boilerplate` boilerplate (`site.yml` → group playbook → `roles/`). Keep that structure.
 
@@ -35,18 +35,21 @@ Before duplicating an env var, check what the dotfiles `bash` module already doe
 
 ## Commands
 ```
+uv sync                                            # create the pinned ansible environment
 cp inventory.example.yml inventory.local.yml       # git-ignored, holds your username
 make up | ping | down                              # test container (docker/, port 2222)
-ansible-playbook site.yml --list-hosts
-ansible-playbook site.yml --check --diff -l g100   # final test: changed=0
-ansible-playbook site.yml -l docker                # converge on the test container
+uv run ansible-playbook site.yml --list-hosts
+uv run ansible-playbook site.yml --check --diff -l g100   # final test: changed=0
+uv run ansible-playbook site.yml -l docker                # converge on the test container
 ```
 
 ## Test environment (Docker, CentOS 8.3)
 `centos:8.3.2011` container with sshd and a non-root user taken from `inventory.local.yml`, home `/g100/home/userexternal/<user>`; `$WORK`/`$CINECA_SCRATCH` are set by `/etc/profile.d/cineca.sh` (fake account `test_account`). CentOS 8 is EOL: rewrite the repos to `vault.centos.org` in the Dockerfile. The container has no real SLURM, `$WORK` or `$CINECA_SCRATCH`: simulate them with environment variables and only verify generated files/binaries. After the first converge, a second converge must report `changed=0`.
 
 ## Target Python
-G100 ships Python 3.6.8 (same as the CentOS 8 container). ansible-core 2.17+ needs Python ≥ 3.7 on the target, so use **ansible-core ≤ 2.16** on the controller (2.16 is the last release supporting 3.6 targets).
+G100 ships Python 3.6.8 (same as the CentOS 8 container). ansible-core 2.17+ needs Python ≥ 3.7 on the target, so the controller uses **ansible-core 2.16** (the last release supporting 3.6 targets), pinned in `pyproject.toml`/`uv.lock`.
+
+**Always run ansible through the project's uv environment**: `uv run ansible …`, `uv run ansible-playbook …`, `uv run ansible-inventory …`. Never use a system/global ansible. Bumping the version requires re-checking Python 3.6 target support.
 
 ## Known limits
 `--check` does not simulate `shell`/installer tasks: use `check_mode: false` only on read-only tasks (e.g. detecting the installed version) and gate installers on `creates:`/`stat`.

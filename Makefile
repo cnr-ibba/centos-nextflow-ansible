@@ -1,7 +1,7 @@
 # Test container mimicking a G100 login node. The user is read from inventory.local (host "docker").
 IMAGE := g100-test
 PORT  := 2222
-USERNAME = $(shell ansible-inventory --host docker | python3 -c 'import json,sys; print(json.load(sys.stdin)["ansible_user"])')
+USERNAME = $(shell uv run ansible-inventory --host docker | python3 -c 'import json,sys; print(json.load(sys.stdin)["ansible_user"])')
 
 .PHONY: build up down ping
 
@@ -17,4 +17,4 @@ down:
 	docker rm -f $(IMAGE)
 
 ping:
-	ansible docker -m ping
+	uv run ansible docker -m ping

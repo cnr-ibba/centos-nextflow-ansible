@@ -14,7 +14,12 @@ The remaining configuration (installing packages, configuring services, etc.) ca
 
 Your username is kept in `inventory.local.yml`, which is git-ignored:
 
+Ansible runs from a [uv](https://docs.astral.sh/uv/) environment pinned in `pyproject.toml`/`uv.lock`
+(ansible-core 2.16, the last release supporting the Python 3.6 of G100). **Always run ansible through it**
+with `uv run`, never with a system-wide ansible:
+
 ```
+uv sync
 cp inventory.example.yml inventory.local.yml
 # edit it: replace "yourusername" with your CINECA username (for both g100 and docker)
 ```
@@ -25,11 +30,11 @@ Your ssh-agent keys (or `~/.ssh/*.pub`) are authorized in the container.
 
 ```
 make up      # build the image with the user from inventory.local.yml and start it on 127.0.0.1:2222
-make ping    # ansible docker -m ping
+make ping    # uv run ansible docker -m ping
 make down    # remove the container
 ```
 
-For `g100`, a valid ssh-agent session (CINECA step client) is assumed: `ansible g100 -m ping` must work.
+For `g100`, a valid ssh-agent session (CINECA step client) is assumed: `uv run ansible g100 -m ping` must work.
 
 ## Using this repository
 
@@ -49,47 +54,47 @@ Specifically, you'll want to customize the following files:
 
 ## Using Ansible
 
-Install `ansible` on your laptop and link the `hosts` file from `/etc/ansible/hosts` to the file in your repository. Now you're all set.
+Use the uv environment described in [Local setup](#local-setup-and-test-environment): prefix every command below with `uv run`.
 
 To run a single (ad-hoc) task on multiple servers:
 
 ```
 # Check connectivity
-ansible all -m ping -u root
+uv run ansible all -m ping -u root
 
 # Run single command on all servers
-ansible all -m command -a "cat /etc/hosts" -u root
+uv run ansible all -m command -a "cat /etc/hosts" -u root
 
 # Run single command only on servers in specific group
-ansible anygroup -m command -a "cat /etc/hosts" -u root
+uv run ansible anygroup -m command -a "cat /etc/hosts" -u root
 
 # Run single command on individual server
-ansible server1 -m command -a "cat /etc/hosts" -u root
+uv run ansible server1 -m command -a "cat /etc/hosts" -u root
 ```
 
 As the `command` module is the default, it can also be omitted:
 
 ```
-ansible server1 -a "cat /etc/hosts" -u root
+uv run ansible server1 -a "cat /etc/hosts" -u root
 ```
 
 To use shell variables on the remote server, use the `shell` module instead of `command`, and use single quotes for the argument:
 
 ```
-ansible server1 -m shell -a 'echo $HOSTNAME' -u root
+uv run ansible server1 -m shell -a 'echo $HOSTNAME' -u root
 ```
 
 The true power of ansible comes with so called *playbooks* &mdash; think of them as scripts, but they're declarative. Playbooks allow for running multiple tasks on any number of servers, as defined in the configuration files (`*.yml`):
 
 ```
 # Run all tasks on all servers
-ansible-playbook site.yml -v
+uv run ansible-playbook site.yml -v
 
 # Run all tasks only on group of servers
-ansible-playbook anygroup.yml -v
+uv run ansible-playbook anygroup.yml -v
 
 # Run all tasks only on individual server
-ansible-playbook site.yml -v -l server1
+uv run ansible-playbook site.yml -v -l server1
 ```
 
 Note that `-v` produces verbose output. `-vv` and `-vvv` are also available for even more (debug) output.
@@ -98,20 +103,20 @@ To verify what tasks would do without changing the actual configuration, use the
 
 ```
 # Show hosts that would be affected by playbook
-ansible-playbook site.yml --list-hosts
+uv run ansible-playbook site.yml --list-hosts
 
 # Perform dry-run to see what tasks would do
-ansible-playbook site.yml -v --check
+uv run ansible-playbook site.yml -v --check
 ```
 
 Running all tasks in a playbook may take a long time. *Tags* are available to organize tasks so one can only run specific tasks to configure a certain component:
 
 ```
 # Show list of available tags
-ansible-playbook site.yml --list-tags
+uv run ansible-playbook site.yml --list-tags
 
 # Only run tasks required to configure DNS
-ansible-playbook site.yml -v -t dns
+uv run ansible-playbook site.yml -v -t dns
 ```
 
 Note that the above command requires you to have tasks defined with the `tags: dns` attribute.
@@ -154,7 +159,7 @@ Consider adding separate roles for different applications (e.g. webservers, dbse
 Use the following command to show a list of available tags:
 
 ```
-ansible-playbook site.yml --list-tags
+uv run ansible-playbook site.yml --list-tags
 ```
 
 Consider adding tags for individual components (e.g. DNS, NTP, HTTP, etc.).
