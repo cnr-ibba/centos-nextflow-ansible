@@ -10,6 +10,27 @@
 
 The remaining configuration (installing packages, configuring services, etc.) can then be achieved using Ansible. In addition, Ansible ensures that configuration of all servers is and remains consistent.
 
+## Local setup and test environment
+
+Your username is kept in `inventory.local.yml`, which is git-ignored:
+
+```
+cp inventory.example.yml inventory.local.yml
+# edit it: replace "yourusername" with your CINECA username (for both g100 and docker)
+```
+
+The `docker` host is a CentOS 8.3 container that mimics a G100 login node. Its home is
+`/g100/home/userexternal/<your user>`, with `$WORK` and `$CINECA_SCRATCH` set for login shells.
+Your ssh-agent keys (or `~/.ssh/*.pub`) are authorized in the container.
+
+```
+make up      # build the image with the user from inventory.local.yml and start it on 127.0.0.1:2222
+make ping    # ansible docker -m ping
+make down    # remove the container
+```
+
+For `g100`, a valid ssh-agent session (CINECA step client) is assumed: `ansible g100 -m ping` must work.
+
 ## Using this repository
 
 Simply download (clone) the repository and start modifying files according to your needs.

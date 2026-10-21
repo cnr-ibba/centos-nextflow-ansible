@@ -35,13 +35,18 @@ Before duplicating an env var, check what the dotfiles `bash` module already doe
 
 ## Commands
 ```
+cp inventory.example.yml inventory.local.yml       # git-ignored, holds your username
+make up | ping | down                              # test container (docker/, port 2222)
 ansible-playbook site.yml --list-hosts
 ansible-playbook site.yml --check --diff -l g100   # final test: changed=0
 ansible-playbook site.yml -l docker                # converge on the test container
 ```
 
 ## Test environment (Docker, CentOS 8.3)
-`centos:8.3.2011` container with a non-root user and sshd. CentOS 8 is EOL: rewrite the repos to `vault.centos.org` in the Dockerfile. The container has no real SLURM, `$WORK` or `$CINECA_SCRATCH`: simulate them with environment variables and only verify generated files/binaries. After the first converge, a second converge must report `changed=0`.
+`centos:8.3.2011` container with sshd and a non-root user taken from `inventory.local.yml`, home `/g100/home/userexternal/<user>`; `$WORK`/`$CINECA_SCRATCH` are set by `/etc/profile.d/cineca.sh` (fake account `test_account`). CentOS 8 is EOL: rewrite the repos to `vault.centos.org` in the Dockerfile. The container has no real SLURM, `$WORK` or `$CINECA_SCRATCH`: simulate them with environment variables and only verify generated files/binaries. After the first converge, a second converge must report `changed=0`.
+
+## Target Python
+G100 ships Python 3.6.8 (same as the CentOS 8 container). ansible-core 2.17+ needs Python ≥ 3.7 on the target, so use **ansible-core ≤ 2.16** on the controller (2.16 is the last release supporting 3.6 targets).
 
 ## Known limits
 `--check` does not simulate `shell`/installer tasks: use `check_mode: false` only on read-only tasks (e.g. detecting the installed version) and gate installers on `creates:`/`stat`.

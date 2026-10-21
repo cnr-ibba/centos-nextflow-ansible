@@ -1,0 +1,13 @@
+# Copy to inventory.local.yml (git-ignored) and replace "yourusername" with your CINECA username.
+all:
+  hosts:
+    g100:
+      ansible_host: login.g100.cineca.it
+      ansible_user: yourusername
+    docker:
+      ansible_host: 127.0.0.1
+      ansible_port: 2222
+      ansible_user: yourusername
+      ansible_python_interpreter: /usr/bin/python3
+      # the container host key changes at every build
+      ansible_ssh_common_args: -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
