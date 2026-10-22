@@ -1,0 +1,38 @@
+---
+# Clone the dotfiles once (update: false) and symlink the module with its own bin/install.
+# bin/install cannot be dry-run, so the read-only drift check below is what makes --check truthful.
+- name: Check for the dotfiles checkout
+  ansible.builtin.stat:
+    path: "{{ dotfiles_dest }}"
+  register: dotfiles_dir
+
+- name: Clone dotfiles ({{ dotfiles_version }})
+  ansible.builtin.git:
+    repo: "{{ dotfiles_repo }}"
+    dest: "{{ dotfiles_dest }}"
+    version: "{{ dotfiles_version }}"
+    update: "{{ dotfiles_update }}"
+  register: dotfiles_git
+
+- name: Look for module files that are not linked in $HOME
+  ansible.builtin.shell: |
+    cd {{ dotfiles_dest }}/{{ dotfiles_module }} || exit 1
+    find . -type f | sort | while read -r f; do
+      rel=${f#./}
+      [ -L "$HOME/.$rel" ] && [ "$(readlink -f "$HOME/.$rel")" = "$(readlink -f "$PWD/$rel")" ] || echo "$rel"
+    done
+  args:
+    executable: /bin/bash
+  register: dotfiles_drift
+  check_mode: false
+  changed_when: dotfiles_drift.stdout | length > 0
+  when: dotfiles_dir.stat.exists
+
+- name: Install the {{ dotfiles_module }} module
+  ansible.builtin.command: ./bin/install {{ dotfiles_module }}
+  args:
+    chdir: "{{ dotfiles_dest }}"
+  changed_when: true
+  when: (dotfiles_git is changed and not ansible_check_mode) or dotfiles_drift is changed
+
+...

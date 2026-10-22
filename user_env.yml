@@ -9,4 +9,7 @@
       tags: miniconda
     - role: condarc
       tags: condarc
+    # last: the bash module configures micromamba/conda env variables and the PATH for what was installed above
+    - role: dotfiles
+      tags: dotfiles
 ...

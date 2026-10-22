@@ -28,15 +28,15 @@ Implemented:
 | `common` | sanity checks: ping, writable `$HOME`, non-root user |
 | `micromamba` | `get_url` of the plain `micromamba-linux-64` binary (sha256-checked, pinned `micromamba_version`) into `~/bin`; space is limited. The `.tar.bz2` used by the galaxy role is a conda package and would scatter `info/` files in `~/bin` |
 | `galaxyproject.miniconda` | vendored in `galaxy_roles/` from Ansible Galaxy (pinned in `requirements.yml`, committed). It does not install anything here (binary already there); it is kept to create conda envs. `miniconda_update: false` (self-update breaks `changed=0`) |
+| `dotfiles` | clones https://github.com/bunop/dotfiles (branch `cineca`, once: `dotfiles_update: false`) into `~/dotfiles` and runs `bin/install bash`; runs last. A read-only drift check makes `--check` truthful. First run on a user with real `~/.bashrc`/`~/.bash_profile` moves them to `.bak`. Its `bash_profile` already exports `NXF_*`, `PRJ_ACCOUNT` (from `~/.ch_acc.def`), SDKMAN init and the mamba init: **do not duplicate them in other roles** |
 | `condarc` | `~/.condarc`: bioconda, conda-forge, nodefaults, strict priority. If the dotfiles ever ship `.condarc` too, drop one of the two |
 
 Planned:
 
 | Role | What it does |
 |---|---|
-| `dotfiles` | clones https://github.com/bunop/dotfiles (branch `cineca`, pinned commit) and runs `bin/install bash` (symlinks in `$HOME`, `.bak` backups) |
 | `sdkman` | installs SDKMAN and the pinned Java |
-| `nextflow` | pinned Nextflow, `~/.nextflow/config`; `NXF_*` variables only if not already in the dotfiles |
+| `nextflow` | pinned Nextflow, `~/.nextflow/config`; `NXF_*` come from the dotfiles, do not set them here |
 | `nf-core` env | declared via `miniconda_conda_environments` with an **absolute** path under `~/.conda/envs` (the dotfiles export `MAMBA_EXE=$HOME/bin/micromamba`, `MAMBA_ROOT_PREFIX=$HOME/.conda`) |
 
 `NXF_*` variables documented by the guide (`~/.bash_profile` on Red Hat): `NXF_EXECUTOR=slurm`, `NXF_OPTS="-Xms500M -Xmx4G"`, `NXF_SINGULARITY_CACHEDIR="$WORK/nxf_singularity_cache"`, `NXF_WORK="$CINECA_SCRATCH/nxf_work"`, `NXF_OFFLINE='true'`, `NXF_ANSI_LOG='false'`. `~/.nextflow/config`: `executor { name='slurm'; queueSize=50; submitRateLimit='10 sec' }`. Nextflow ≥ 24.10.3 requires Java ≥ 11.

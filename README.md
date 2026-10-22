@@ -138,7 +138,8 @@ File | Description
 roles/
 ├── common/             Sanity checks: ping, non-root user, writable $HOME
 ├── micromamba/         micromamba binary (get_url, sha256-checked) in ~/bin
-└── condarc/            ~/.condarc (bioconda, conda-forge, nodefaults, strict priority)
+├── condarc/            ~/.condarc (bioconda, conda-forge, nodefaults, strict priority)
+└── dotfiles/           bunop/dotfiles (branch cineca) cloned in ~/dotfiles, `bin/install bash`
 galaxy_roles/           Third-party roles from Ansible Galaxy, committed to the repo
 └── galaxyproject.miniconda/
 ```
@@ -162,6 +163,7 @@ common | check
 micromamba | micromamba
 galaxyproject.miniconda | miniconda
 condarc | condarc
+dotfiles | dotfiles
 
 ## Copyright and license
 

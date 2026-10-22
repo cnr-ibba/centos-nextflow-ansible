@@ -11,7 +11,17 @@ miniconda_distribution: micromamba
 miniconda_prefix: "{{ ansible_env.HOME }}"
 miniconda_installer_version: "{{ micromamba_version }}"
 miniconda_version: "{{ micromamba_version }}"
+# the binary comes from the micromamba role, never from the galaxy role's installer
+miniconda_install: false
 # self-update would report "changed" on every run
 miniconda_update: false
+
+# bunop/dotfiles: `bin/install bash` links ~/.bashrc, ~/.bash_profile (NXF_* variables, SDKMAN and
+# micromamba init), ~/.bash_aliases... The clone is not refreshed unless -e dotfiles_update=true
+dotfiles_repo: https://github.com/bunop/dotfiles.git
+dotfiles_version: cineca
+dotfiles_module: bash
+dotfiles_dest: "{{ ansible_env.HOME }}/dotfiles"
+dotfiles_update: false
 
 ...
