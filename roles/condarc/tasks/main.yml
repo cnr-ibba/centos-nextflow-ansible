@@ -1,0 +1,13 @@
+---
+- name: Configure conda/mamba channels
+  ansible.builtin.copy:
+    dest: "{{ ansible_env.HOME }}/.condarc"
+    mode: "0644"
+    content: |
+      channels:
+        - bioconda
+        - conda-forge
+        - nodefaults
+      channel_priority: strict
+
+...

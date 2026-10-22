@@ -8,6 +8,15 @@
     data: alive
   tags: check
 
-# Add further tasks for the common role (applied to all servers) to this playbook...
+- name: Check that the user is not root
+  ansible.builtin.assert:
+    that: ansible_user_id != 'root'
+    quiet: true
+
+- name: Check that $HOME is writable
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}"
+  register: common_home
+  failed_when: not common_home.stat.writeable
 
 ...

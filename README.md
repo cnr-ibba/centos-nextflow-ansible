@@ -123,50 +123,45 @@ Note that the above command requires you to have tasks defined with the `tags: d
 
 ## Configuration files
 
-The `hosts` file defines all hosts and groups which they belong to. Note that a single host can be member of multiple groups. Define groups for each rack, for each network, or for each environment (e.g. production vs. test).
+Hosts (and the username) are defined in `inventory.local.yml`, see [Local setup](#local-setup-and-test-environment).
 
 ### Playbooks
 
-Playbooks associate hosts (groups) with roles. Define a separate playbook for each of your groups, and then import all playbooks in the main `site.yml` playbook.
-
 File | Description
 ---- | -----------
-`site.yml` | Main playbook - runs all tasks on all servers
-`anygroup.yml` | Group playbook - runs all tasks on servers in group *anygroup*
+`site.yml` | Main playbook - imports all the others
+`user_env.yml` | Configures the user's `$HOME` on all hosts (`g100` and `docker`)
 
 ### Roles
 
-The group playbooks (e.g. `anygroup.yml`) simply associate hosts with roles. Actual tasks are defined in these roles:
-
 ```
 roles/
-├── common/             Applied to all servers
-│   ├── handlers/
-│   ├── tasks/
-│   │   └ main.yml      Tasks for all servers
-│   └── templates/
-└── anyrole/            Applied to servers in specific group(s)
-    ├── handlers/
-    ├── tasks/
-    │   └ main.yml      Tasks for specific group(s)
-    └── templates/
+├── common/             Sanity checks: ping, non-root user, writable $HOME
+├── micromamba/         micromamba binary (get_url, sha256-checked) in ~/bin
+└── condarc/            ~/.condarc (bioconda, conda-forge, nodefaults, strict priority)
+galaxy_roles/           Third-party roles from Ansible Galaxy, committed to the repo
+└── galaxyproject.miniconda/
 ```
 
-Consider adding separate roles for different applications (e.g. webservers, dbservers, hypervisors, etc.), or for different responsibilities which servers fulfill (e.g. infra_server vs. infra_client).
+micromamba is used instead of Miniconda because space is limited. `galaxyproject.miniconda` finds the binary
+installed by the `micromamba` role and will be used to create conda environments. Roles in `galaxy_roles/` are listed in `requirements.yml` and installed with:
+
+```
+uv run ansible-galaxy role install -p galaxy_roles -r requirements.yml --force
+```
 
 ### Tags
-
-Use the following command to show a list of available tags:
 
 ```
 uv run ansible-playbook site.yml --list-tags
 ```
 
-Consider adding tags for individual components (e.g. DNS, NTP, HTTP, etc.).
-
 Role | Tags
 --- | ---
-Common | all,check
+common | check
+micromamba | micromamba
+galaxyproject.miniconda | miniconda
+condarc | condarc
 
 ## Copyright and license
 

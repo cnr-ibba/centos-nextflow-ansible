@@ -1,0 +1,20 @@
+- name: Warn if channels are provided but tos is not supported
+  ansible.builtin.debug:
+    msg: >
+      Channels were provided ({{ miniconda_tos_channels }})
+      but no `miniconda_tos_executable` was defined.
+      Terms of Service cannot be accepted.
+  when:
+    - miniconda_tos_channels | length > 0
+    - miniconda_tos_executable | length == 0
+
+- name: Accept Terms of Service for provided channels
+  ansible.builtin.command: >
+    {{ miniconda_prefix }}/bin/{{ miniconda_tos_executable }} tos accept
+    --override-channels --channel {{ item }}
+  args:
+    creates: "{{ miniconda_prefix }}/.conda_tos_{{ item | regex_replace('[^a-zA-Z0-9]', '_') }}"
+  loop: "{{ miniconda_tos_channels | default([]) }}"
+  when:
+    - miniconda_tos_channels | length > 0
+    - miniconda_tos_executable | length > 0

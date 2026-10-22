@@ -1,0 +1,6 @@
+---
+# Vendored in galaxy_roles/ and committed. Install/update with:
+#   uv run ansible-galaxy role install -p galaxy_roles -r requirements.yml --force
+roles:
+  - name: galaxyproject.miniconda
+    version: "0.3.4"

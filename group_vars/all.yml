@@ -1,5 +1,17 @@
 ---
+# micromamba instead of Miniforge/Miniconda: space in $HOME is limited.
+# The binary goes to $HOME/bin (the dotfiles export MAMBA_EXE=$HOME/bin/micromamba and
+# MAMBA_ROOT_PREFIX=$HOME/.conda). Environments must be declared with absolute paths
+# (e.g. "{{ ansible_env.HOME }}/.conda/envs/<name>") to match the role's `creates:` check.
+micromamba_version: 2.9.0-0   # mamba-org/micromamba-releases tag
+micromamba_url: "https://github.com/mamba-org/micromamba-releases/releases/download/{{ micromamba_version }}/micromamba-linux-64"
 
-# Add further variables which apply to all servers to this file...
+# galaxyproject.miniconda settings: it must find the binary installed by the micromamba role
+miniconda_distribution: micromamba
+miniconda_prefix: "{{ ansible_env.HOME }}"
+miniconda_installer_version: "{{ micromamba_version }}"
+miniconda_version: "{{ micromamba_version }}"
+# self-update would report "changed" on every run
+miniconda_update: false
 
 ...

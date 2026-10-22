@@ -20,18 +20,31 @@ The repo starts from the `acch/ansible-boilerplate` boilerplate (`site.yml` → 
 - Nextflow as a SLURM job (sbatch, account, partition, qos): defined in each project.
 - The Nextflow `cineca` profile: comes from https://github.com/cnr-ibba/nf-configs, cloned in `$WORK`, outside this repo.
 
-## Planned components
+## Components
+Implemented:
+
 | Role | What it does |
 |---|---|
 | `common` | sanity checks: ping, writable `$HOME`, non-root user |
+| `micromamba` | `get_url` of the plain `micromamba-linux-64` binary (sha256-checked, pinned `micromamba_version`) into `~/bin`; space is limited. The `.tar.bz2` used by the galaxy role is a conda package and would scatter `info/` files in `~/bin` |
+| `galaxyproject.miniconda` | vendored in `galaxy_roles/` from Ansible Galaxy (pinned in `requirements.yml`, committed). It does not install anything here (binary already there); it is kept to create conda envs. `miniconda_update: false` (self-update breaks `changed=0`) |
+| `condarc` | `~/.condarc`: bioconda, conda-forge, nodefaults, strict priority. If the dotfiles ever ship `.condarc` too, drop one of the two |
+
+Planned:
+
+| Role | What it does |
+|---|---|
 | `dotfiles` | clones https://github.com/bunop/dotfiles (branch `cineca`, pinned commit) and runs `bin/install bash` (symlinks in `$HOME`, `.bak` backups) |
 | `sdkman` | installs SDKMAN and the pinned Java |
 | `nextflow` | pinned Nextflow, `~/.nextflow/config`; `NXF_*` variables only if not already in the dotfiles |
-| `miniconda` | pinned installer, `nf-core` env (`pip install nf-core`) |
+| `nf-core` env | declared via `miniconda_conda_environments` with an **absolute** path under `~/.conda/envs` (the dotfiles export `MAMBA_EXE=$HOME/bin/micromamba`, `MAMBA_ROOT_PREFIX=$HOME/.conda`) |
 
 `NXF_*` variables documented by the guide (`~/.bash_profile` on Red Hat): `NXF_EXECUTOR=slurm`, `NXF_OPTS="-Xms500M -Xmx4G"`, `NXF_SINGULARITY_CACHEDIR="$WORK/nxf_singularity_cache"`, `NXF_WORK="$CINECA_SCRATCH/nxf_work"`, `NXF_OFFLINE='true'`, `NXF_ANSI_LOG='false'`. `~/.nextflow/config`: `executor { name='slurm'; queueSize=50; submitRateLimit='10 sec' }`. Nextflow ≥ 24.10.3 requires Java ≥ 11.
 
 Before duplicating an env var, check what the dotfiles `bash` module already does. Before writing a new role, check whether the author already has an equivalent one to reuse.
+
+## Vendored roles
+Third-party roles live in `galaxy_roles/` (in `roles_path`), are committed, and are declared in `requirements.yml`. Install/update: `uv run ansible-galaxy role install -p galaxy_roles -r requirements.yml --force`. Do not edit them by hand.
 
 ## Commands
 ```
