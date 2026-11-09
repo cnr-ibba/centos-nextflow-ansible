@@ -9,6 +9,10 @@
       tags: miniconda
     - role: condarc
       tags: condarc
+    - role: sdkman
+      tags: sdkman
+    - role: nextflow
+      tags: nextflow
     # last: the bash module configures micromamba/conda env variables and the PATH for what was installed above
     - role: dotfiles
       tags: dotfiles

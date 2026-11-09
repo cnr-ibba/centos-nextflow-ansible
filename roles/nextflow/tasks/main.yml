@@ -1,0 +1,30 @@
+---
+# NXF_* variables come from the dotfiles; Java comes from the sdkman role.
+- name: Create ~/bin and ~/.nextflow
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: [bin, .nextflow]
+  register: nextflow_dirs
+
+- name: Install Nextflow {{ nextflow_version }}
+  ansible.builtin.get_url:
+    url: "{{ nextflow_url }}"
+    checksum: "sha256:{{ nextflow_sha256 }}"
+    dest: "{{ ansible_env.HOME }}/bin/nextflow"
+    mode: "0755"
+  # --check on a fresh host: ~/bin does not exist yet, get_url would fail
+  when: not (nextflow_dirs is changed and ansible_check_mode)
+
+- name: Configure the Nextflow executor
+  ansible.builtin.copy:
+    dest: "{{ ansible_env.HOME }}/.nextflow/config"
+    mode: "0644"
+    content: |
+      executor {
+          queueSize = 50
+          submitRateLimit = '50/2min'
+      }
+
+...

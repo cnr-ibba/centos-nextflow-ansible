@@ -1,0 +1,24 @@
+---
+# rcupdate=false: the dotfiles already source sdkman-init.sh from ~/.bash_profile.
+- name: Check for SDKMAN
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.sdkman/bin/sdkman-init.sh"
+  register: sdkman_init
+
+- name: Install SDKMAN
+  ansible.builtin.shell: curl -fsSL "https://get.sdkman.io?ci=true&rcupdate=false" | bash
+  args:
+    executable: /bin/bash
+    creates: "{{ ansible_env.HOME }}/.sdkman/bin/sdkman-init.sh"
+
+- name: Install Java {{ sdkman_java_version }}
+  ansible.builtin.shell: |
+    source "$HOME/.sdkman/bin/sdkman-init.sh"
+    sdk install java {{ sdkman_java_version }}
+  args:
+    executable: /bin/bash
+    creates: "{{ ansible_env.HOME }}/.sdkman/candidates/java/{{ sdkman_java_version }}"
+  # --check: SDKMAN is not installed yet on a fresh host
+  when: sdkman_init.stat.exists or not ansible_check_mode
+
+...
