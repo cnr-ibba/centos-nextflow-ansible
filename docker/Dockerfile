@@ -15,12 +15,15 @@ ARG USERNAME
 ARG ACCOUNT=test_account
 RUN test -n "$USERNAME" \
     && mkdir -p /g100/home/userexternal \
-    && useradd -m -p '*' -s /bin/bash -d /g100/home/userexternal/$USERNAME $USERNAME \
+    && groupadd -g 25200 interactive \
+    && useradd -m -p '*' -g interactive -s /bin/bash -d /g100/home/userexternal/$USERNAME $USERNAME \
     && echo "$ACCOUNT" > /g100/home/userexternal/$USERNAME/.ch_acc.def \
     && chown $USERNAME: /g100/home/userexternal/$USERNAME/.ch_acc.def \
-    && mkdir -p /g100_work/$ACCOUNT /g100_scratch/userexternal/$USERNAME \
+    && mkdir -p /g100_work/$ACCOUNT /g100_scratch/userexternal/$USERNAME /scratch_local \
     && chown $USERNAME: /g100_work/$ACCOUNT /g100_scratch/userexternal/$USERNAME \
-    && printf 'export WORK=/g100_work/%s\nexport CINECA_SCRATCH=/g100_scratch/userexternal/%s\n' \
+    && chmod 770 /g100_work/$ACCOUNT /g100_scratch/userexternal/$USERNAME \
+    && chmod 1777 /scratch_local \
+    && printf 'export WORK=/g100_work/%s\nexport CINECA_SCRATCH=/g100_scratch/userexternal/%s\n[ "$(id -g)" = 25200 ] && export TMPDIR=/scratch_local\n' \
         "$ACCOUNT" "$USERNAME" > /etc/profile.d/cineca.sh
 
 WORKDIR /g100/home/userexternal/$USERNAME
