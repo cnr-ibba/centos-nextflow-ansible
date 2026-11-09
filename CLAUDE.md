@@ -33,13 +33,8 @@ Implemented:
 | `nextflow` | `get_url` of the plain release launcher (sha256-checked, pinned `nextflow_version`) into `~/bin`, plus `~/.nextflow/config` (slurm executor). `NXF_*` come from the dotfiles |
 | `jq` | `get_url` of the static `jq-linux-amd64` binary (sha256-checked, pinned `jq_version`) into `~/bin`; needed by `squeue.sh`/`sacct.sh` |
 | `gists` | clones the `bin_gists` (fix_permissions, squeue, sacct, rotate_stuff) once into `~/bin/<gist id>` and symlinks the script into `~/bin` (relative link, as in prod). **Exception to the pinning rule**: they track `master` with `update: false` and are refreshed by hand with `git pull` |
+| `condapip` | `pip install` of pinned tools into conda envs declared in `miniconda_conda_environments` (absolute path under `~/.conda/envs`; the dotfiles export `MAMBA_EXE=$HOME/bin/micromamba`, `MAMBA_ROOT_PREFIX=$HOME/.conda`): `nf-core` (nf-core/tools via pip, as in prod) and `csvkit`; list in `condapip_packages` |
 | `condarc` | `~/.condarc`: bioconda, conda-forge, nodefaults, strict priority. If the dotfiles ever ship `.condarc` too, drop one of the two |
-
-Planned:
-
-| Role | What it does |
-|---|---|
-| `nf-core` env | declared via `miniconda_conda_environments` with an **absolute** path under `~/.conda/envs` (the dotfiles export `MAMBA_EXE=$HOME/bin/micromamba`, `MAMBA_ROOT_PREFIX=$HOME/.conda`) |
 
 `NXF_*` variables documented by the guide (`~/.bash_profile` on Red Hat): `NXF_EXECUTOR=slurm`, `NXF_OPTS="-Xms500M -Xmx4G"`, `NXF_SINGULARITY_CACHEDIR="$WORK/nxf_singularity_cache"`, `NXF_WORK="$CINECA_SCRATCH/nxf_work"`, `NXF_OFFLINE='true'`, `NXF_ANSI_LOG='false'`. `~/.nextflow/config`: `executor { queueSize=50; submitRateLimit='50/2min' }` (no `name`: `executor.name` in the config beats `NXF_EXECUTOR`, so `NXF_EXECUTOR=slurm` from the dotfiles stays the default and `NXF_EXECUTOR=local` works, e.g. inside a job) (the author's own value from his production `config.bak`; the guide says `'10 sec'`). Config order, lowest to highest: `~/.nextflow/config`, project `nextflow.config`, launch-dir `nextflow.config`, `-c`; the `galileo` profile of nf-configs sets `process.executor='slurm'`, `queueSize=100`, `submitRateLimit='50/2min'` and wins over this file. Nextflow 26.x requires Java 17–26 (24.10.x: Java ≥ 11). To test `nextflow run hello` in the container: `NXF_OFFLINE=false` (to pull `nextflow-io/hello`), `NXF_EXECUTOR=local` (no `sbatch` in the container). `NXF_WORK`/`NXF_TEMP` already resolve to existing dirs.
 

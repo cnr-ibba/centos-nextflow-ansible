@@ -4,9 +4,11 @@
     - common
     - role: micromamba
       tags: micromamba
-    # no-op for now: will create the conda environments with the micromamba installed above
+    # creates the conda environments (miniconda_conda_environments) with the micromamba installed above
     - role: galaxyproject.miniconda
       tags: miniconda
+    - role: condapip
+      tags: condapip
     - role: condarc
       tags: condarc
     - role: sdkman

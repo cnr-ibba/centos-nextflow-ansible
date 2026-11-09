@@ -1,0 +1,19 @@
+---
+# pip-installs pinned tools into the conda envs created by galaxyproject.miniconda (same as done by hand in prod).
+- name: Look for the pip of each conda env
+  ansible.builtin.stat:
+    path: "{{ item.env }}/bin/pip"
+  loop: "{{ condapip_packages }}"
+  register: condapip_pips
+
+- name: Install pinned pip packages in the conda envs
+  ansible.builtin.pip:
+    name: "{{ item.item.package }}=={{ item.item.version }}"
+    executable: "{{ item.item.env }}/bin/pip"
+  loop: "{{ condapip_pips.results }}"
+  loop_control:
+    label: "{{ item.item.package }}=={{ item.item.version }}"
+  # --check on a fresh host: the env is not created yet (conda tasks are not simulated)
+  when: item.stat.exists or not ansible_check_mode
+
+...

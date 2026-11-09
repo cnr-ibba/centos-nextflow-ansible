@@ -16,6 +16,21 @@ miniconda_install: false
 # self-update would report "changed" on every run
 miniconda_update: false
 
+# Conda envs (created once, python minor pinned) and the tools pip-installed into them by the condapip role.
+# nf-core/tools is installed with pip, not conda, as in prod.
+nfcore_tools_version: 4.2.1
+csvkit_version: 2.2.0
+miniconda_conda_environments:
+  "{{ ansible_env.HOME }}/.conda/envs/nf-core":
+    channels: [conda-forge]
+    packages: [python=3.12, pip]
+  "{{ ansible_env.HOME }}/.conda/envs/csvkit":
+    channels: [conda-forge]
+    packages: [python=3.12, pip]
+condapip_packages:
+  - {env: "{{ ansible_env.HOME }}/.conda/envs/nf-core", package: nf-core, version: "{{ nfcore_tools_version }}"}
+  - {env: "{{ ansible_env.HOME }}/.conda/envs/csvkit", package: csvkit, version: "{{ csvkit_version }}"}
+
 # bunop/dotfiles: `bin/install bash` links ~/.bashrc, ~/.bash_profile (NXF_* variables, SDKMAN and
 # micromamba init), ~/.bash_aliases... The clone is not refreshed unless -e dotfiles_update=true
 dotfiles_repo: https://github.com/bunop/dotfiles.git

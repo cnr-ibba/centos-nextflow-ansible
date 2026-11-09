@@ -4,8 +4,7 @@ User-level [Ansible](https://www.ansible.com/) playbook that configures the `$HO
 (target: CINECA Galileo100, "G100") to run [Nextflow](https://www.nextflow.io/) pipelines, following the
 [bioinfo-guidelines](https://bioinfo-guidelines.readthedocs.io) (Nextflow, SLURM and Conda sections).
 
-It sets up dotfiles, a micromamba/conda environment and `~/.condarc`. SDKMAN + Java, Nextflow and an nf-core conda
-environment are planned.
+It sets up dotfiles, a micromamba/conda environment with `nf-core` and `csvkit` envs, `~/.condarc`, SDKMAN + Java and Nextflow.
 
 Principles:
 
@@ -93,6 +92,7 @@ File | Description
 roles/
 ├── common/             Sanity checks: ping, non-root user, writable $HOME
 ├── micromamba/         micromamba binary (get_url, sha256-checked) in ~/bin
+├── condapip/           pip-installs nf-core/tools and csvkit into their conda envs
 ├── condarc/            ~/.condarc (bioconda, conda-forge, nodefaults, strict priority)
 └── dotfiles/           bunop/dotfiles (branch cineca) cloned in ~/dotfiles, `bin/install bash`
 galaxy_roles/           Third-party roles from Ansible Galaxy, committed to the repo
@@ -117,6 +117,7 @@ Role | Tags
 common | check
 micromamba | micromamba
 galaxyproject.miniconda | miniconda
+condapip | condapip
 condarc | condarc
 dotfiles | dotfiles
 
