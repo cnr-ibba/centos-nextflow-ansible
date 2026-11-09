@@ -1,14 +1,24 @@
-# Ansible-Boilerplate
+# centos-nextflow-ansible
 
-[![GitHub Issues](https://img.shields.io/github/issues/acch/ansible-boilerplate.svg)](https://github.com/acch/ansible-boilerplate/issues) [![GitHub Stars](https://img.shields.io/github/stars/acch/ansible-boilerplate.svg?label=github%20%E2%98%85)](https://github.com/acch/ansible-boilerplate/) [![License](https://img.shields.io/github/license/acch/ansible-boilerplate.svg)](LICENSE)
+User-level [Ansible](https://www.ansible.com/) playbook that configures the `$HOME` of a user on a CentOS 8 HPC cluster
+(target: CINECA Galileo100, "G100") to run [Nextflow](https://www.nextflow.io/) pipelines, following the
+[bioinfo-guidelines](https://bioinfo-guidelines.readthedocs.io) (Nextflow, SLURM and Conda sections).
 
-[Ansible](https://www.ansible.com/) is a configuration management tool, similar to [Chef](https://www.chef.io/) and [Puppet](https://puppet.com/). It allows for performing logical configuration of infrastructure components, such as servers and network switches. The configuration files in this repository can act as a template for your own Ansible projects, in order to get you started quickly. Once you've customized the configuration files then new servers can be configured quickly &mdash; excluding their network configuration. This means that adding new servers is as simple as:
+It sets up dotfiles, a micromamba/conda environment and `~/.condarc`. SDKMAN + Java, Nextflow and an nf-core conda
+environment are planned.
 
-- Base OS installation of new server
-- Network configuration of new server (including bond, bridge, DNS and routing)
-- Configuration of password-less (public key) SSH authentication from the Ansible host (your laptop) to the new server
+Principles:
 
-The remaining configuration (installing packages, configuring services, etc.) can then be achieved using Ansible. In addition, Ansible ensures that configuration of all servers is and remains consistent.
+- User-level only: never root, never `become`, nothing written outside `$HOME`.
+- No usernames or secrets in the repository: your username lives in a git-ignored `inventory.local.yml`.
+- All versions are pinned.
+- Idempotent: after the first run, `--check` and every further run must report `changed=0`.
+
+Out of scope: SSH/ssh-agent setup, running Nextflow as a SLURM job (defined in each project) and the Nextflow `cineca`
+profile (from [cnr-ibba/nf-configs](https://github.com/cnr-ibba/nf-configs)).
+
+The repository structure (`site.yml` → group playbook → `roles/`) comes from
+[acch/ansible-boilerplate](https://github.com/acch/ansible-boilerplate) (MIT).
 
 ## Local setup and test environment
 
@@ -34,92 +44,37 @@ make ping    # uv run ansible docker -m ping
 make down    # remove the container
 ```
 
+To open a shell in the test container (same user as in `inventory.local.yml`):
+
+```
+ssh -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null <your user>@127.0.0.1
+# or, without ssh, as root:
+docker exec -it g100-test bash
+# or, as your user:
+docker exec -it -u <your user> g100-test bash -l
+```
+
 For `g100`, a valid ssh-agent session (CINECA step client) is assumed: `uv run ansible g100 -m ping` must work.
 
-## Using this repository
+## Usage
 
-Simply download (clone) the repository and start modifying files according to your needs.
-
-```
-git clone https://github.com/acch/ansible-boilerplate.git myAnsibleProject/
-```
-
-Ideally, you'll want to use [Git](https://git-scm.com/) to manage your Ansible configuration files. For that purpose simply [fork](https://help.github.com/articles/fork-a-repo/) this repository into your own Git repository before cloning and customizing it. Alternatively, create your own repository [from the template](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template). Git will allow you to version and roll-back changes with ease.
-
-Specifically, you'll want to customize the following files:
-- Add your own hosts and groups to file `hosts`. You'll want to replace `[anygroup]` with a more meaningful group name, and add your own groups as required.
-- Define roles by adding subdirectories underneath directory `roles/`. You'll want to rename `anyrole/` to a more meaningful role name, and add your own roles as required.
-- Associate your hosts (groups) with your roles by adding appropriate playbooks in the root directory. Rename `anygroup.yml` to a more meaningful playbook name.
-- Import all your playbooks in the main `site.yml` playbook.
-
-## Using Ansible
-
-Use the uv environment described in [Local setup](#local-setup-and-test-environment): prefix every command below with `uv run`.
-
-To run a single (ad-hoc) task on multiple servers:
+Prefix every command with `uv run` (see [Local setup](#local-setup-and-test-environment)).
 
 ```
-# Check connectivity
-uv run ansible all -m ping -u root
-
-# Run single command on all servers
-uv run ansible all -m command -a "cat /etc/hosts" -u root
-
-# Run single command only on servers in specific group
-uv run ansible anygroup -m command -a "cat /etc/hosts" -u root
-
-# Run single command on individual server
-uv run ansible server1 -m command -a "cat /etc/hosts" -u root
-```
-
-As the `command` module is the default, it can also be omitted:
-
-```
-uv run ansible server1 -a "cat /etc/hosts" -u root
-```
-
-To use shell variables on the remote server, use the `shell` module instead of `command`, and use single quotes for the argument:
-
-```
-uv run ansible server1 -m shell -a 'echo $HOSTNAME' -u root
-```
-
-The true power of ansible comes with so called *playbooks* &mdash; think of them as scripts, but they're declarative. Playbooks allow for running multiple tasks on any number of servers, as defined in the configuration files (`*.yml`):
-
-```
-# Run all tasks on all servers
-uv run ansible-playbook site.yml -v
-
-# Run all tasks only on group of servers
-uv run ansible-playbook anygroup.yml -v
-
-# Run all tasks only on individual server
-uv run ansible-playbook site.yml -v -l server1
-```
-
-Note that `-v` produces verbose output. `-vv` and `-vvv` are also available for even more (debug) output.
-
-To verify what tasks would do without changing the actual configuration, use the `--list-hosts` and `--check` parameters:
-
-```
-# Show hosts that would be affected by playbook
+# Show the hosts that would be affected
 uv run ansible-playbook site.yml --list-hosts
 
-# Perform dry-run to see what tasks would do
-uv run ansible-playbook site.yml -v --check
+# Dry-run on your G100 user: must report changed=0 once configured
+uv run ansible-playbook site.yml --check --diff -l g100
+
+# Converge the test container (a second run must report changed=0)
+uv run ansible-playbook site.yml -l docker
+
+# Run a single component, using its tag
+uv run ansible-playbook site.yml -l docker -t dotfiles
 ```
 
-Running all tasks in a playbook may take a long time. *Tags* are available to organize tasks so one can only run specific tasks to configure a certain component:
-
-```
-# Show list of available tags
-uv run ansible-playbook site.yml --list-tags
-
-# Only run tasks required to configure DNS
-uv run ansible-playbook site.yml -v -t dns
-```
-
-Note that the above command requires you to have tasks defined with the `tags: dns` attribute.
+Use `-v`, `-vv` or `-vvv` for more verbose output.
 
 ## Configuration files
 
@@ -167,4 +122,5 @@ dotfiles | dotfiles
 
 ## Copyright and license
 
-Copyright 2017 Achim Christ, released under the [MIT license](LICENSE)
+Copyright (c) 2017 Achim Christ (original boilerplate), Copyright (c) 2026 Paolo Cozzi.
+Released under the [MIT license](LICENSE).
