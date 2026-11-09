@@ -32,4 +32,18 @@ nextflow_version: 26.10.5
 nextflow_url: "https://github.com/nextflow-io/nextflow/releases/download/v{{ nextflow_version }}/nextflow"
 nextflow_sha256: 7b6005aa9da0611d404c218b515f57c7b8e91a78af9e2c2adb21c4074eb2d175
 
+# jq (static binary into ~/bin), required by squeue.sh and sacct.sh
+jq_version: 1.8.2
+jq_url: "https://github.com/jqlang/jq/releases/download/jq-{{ jq_version }}/jq-linux-amd64"
+jq_sha256: b1c22172dd303f3be49e935aa56aa48a8b7a46e0bc838b4997d3bb451495870f
+
+# Helper scripts from gists: cloned into ~/bin/<id> and symlinked into ~/bin. Deliberately NOT pinned
+# (exception to the pinning rule): they track master and are refreshed by hand with `git pull`.
+gists_update: false
+bin_gists:
+  - {id: a378af54e493b337cb0219bc06d4aedb, script: fix_permissions.sh, link: fix_permissions.sh}
+  - {id: 6648189742935af244f032240b93050c, script: squeue_galileo.sh, link: squeue.sh}
+  - {id: d4d7c3c599675765c1ca74adf266c5fa, script: sacct_galileo.sh, link: sacct.sh}
+  - {id: 625bec709906c6c2f9815fc10be99c52, script: rotate_stuff.sh, link: rotate_stuff.sh}
+
 ...

@@ -13,6 +13,10 @@
       tags: sdkman
     - role: nextflow
       tags: nextflow
+    - role: jq
+      tags: jq
+    - role: gists
+      tags: gists
     # last: the bash module configures micromamba/conda env variables and the PATH for what was installed above
     - role: dotfiles
       tags: dotfiles

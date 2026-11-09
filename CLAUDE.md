@@ -31,6 +31,8 @@ Implemented:
 | `dotfiles` | clones https://github.com/bunop/dotfiles (branch `cineca`, once: `dotfiles_update: false`) into `~/dotfiles` and runs `bin/install bash`; runs last. A read-only drift check makes `--check` truthful. First run on a user with real `~/.bashrc`/`~/.bash_profile` moves them to `.bak`. Its `bash_profile` already exports `NXF_*`, `PRJ_ACCOUNT` (from `~/.ch_acc.def`), SDKMAN init and the mamba init: **do not duplicate them in other roles** |
 | `sdkman` | installs SDKMAN (`ci=true&rcupdate=false`: the dotfiles already source it) and the pinned Temurin Java (`sdkman_java_version`, use the identifier printed by `sdk list java`, e.g. `21.0.13.0+9-tem`) |
 | `nextflow` | `get_url` of the plain release launcher (sha256-checked, pinned `nextflow_version`) into `~/bin`, plus `~/.nextflow/config` (slurm executor). `NXF_*` come from the dotfiles |
+| `jq` | `get_url` of the static `jq-linux-amd64` binary (sha256-checked, pinned `jq_version`) into `~/bin`; needed by `squeue.sh`/`sacct.sh` |
+| `gists` | clones the `bin_gists` (fix_permissions, squeue, sacct, rotate_stuff) once into `~/bin/<gist id>` and symlinks the script into `~/bin` (relative link, as in prod). **Exception to the pinning rule**: they track `master` with `update: false` and are refreshed by hand with `git pull` |
 | `condarc` | `~/.condarc`: bioconda, conda-forge, nodefaults, strict priority. If the dotfiles ever ship `.condarc` too, drop one of the two |
 
 Planned:
