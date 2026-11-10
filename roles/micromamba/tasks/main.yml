@@ -1,13 +1,6 @@
 ---
-# Plain static binary from the release assets: the .tar.bz2 used by galaxyproject.miniconda
-# is a conda package and would scatter its info/ files in ~/bin
-- name: Create ~/bin
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/bin"
-    state: directory
-    mode: "0755"
-  register: micromamba_bindir
-
+# Plain static binary from the release assets: the .tar.bz2 is a conda package
+# and would scatter its info/ files in ~/bin
 - name: Install micromamba {{ micromamba_version }}
   ansible.builtin.get_url:
     url: "{{ micromamba_url }}"
@@ -15,6 +8,6 @@
     dest: "{{ ansible_env.HOME }}/bin/micromamba"
     mode: "0755"
   # --check on a fresh host: ~/bin does not exist yet, get_url would fail
-  when: not (micromamba_bindir is changed and ansible_check_mode)
+  when: not (common_bin is changed and ansible_check_mode)
 
 ...

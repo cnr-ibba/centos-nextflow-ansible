@@ -1,13 +1,6 @@
 ---
 # Each gist is cloned once (update: false) into ~/bin/<gist id> and the script is symlinked
 # (relative link) into ~/bin; refresh by hand with `git pull` in the clone.
-- name: Create ~/bin
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/bin"
-    state: directory
-    mode: "0755"
-  register: gists_dir
-
 - name: Clone the gists
   ansible.builtin.git:
     repo: "https://gist.github.com/{{ item.id }}.git"
@@ -18,7 +11,7 @@
   loop_control:
     label: "{{ item.id }}"
   # --check on a fresh host: ~/bin does not exist yet
-  when: not (gists_dir is changed and ansible_check_mode)
+  when: not (common_bin is changed and ansible_check_mode)
 
 - name: Link the gist scripts into ~/bin
   ansible.builtin.file:
@@ -28,6 +21,6 @@
   loop: "{{ bin_gists }}"
   loop_control:
     label: "{{ item.link }}"
-  when: not (gists_dir is changed and ansible_check_mode)
+  when: not (common_bin is changed and ansible_check_mode)
 
 ...

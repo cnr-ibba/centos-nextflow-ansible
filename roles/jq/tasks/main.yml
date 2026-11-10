@@ -1,12 +1,5 @@
 ---
 # jq is needed by squeue.sh / sacct.sh (gists role). Static binary, same pattern as the nextflow role.
-- name: Create ~/bin
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/bin"
-    state: directory
-    mode: "0755"
-  register: jq_dir
-
 - name: Install jq {{ jq_version }}
   ansible.builtin.get_url:
     url: "{{ jq_url }}"
@@ -14,6 +7,6 @@
     dest: "{{ ansible_env.HOME }}/bin/jq"
     mode: "0755"
   # --check on a fresh host: ~/bin does not exist yet, get_url would fail
-  when: not (jq_dir is changed and ansible_check_mode)
+  when: not (common_bin is changed and ansible_check_mode)
 
 ...

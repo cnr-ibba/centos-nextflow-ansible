@@ -19,4 +19,11 @@
   register: common_home
   failed_when: not common_home.stat.writeable
 
+- name: Create ~/bin
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/bin"
+    state: directory
+    mode: "0755"
+  register: common_bin
+
 ...
