@@ -18,6 +18,7 @@
 - name: Configure the Nextflow executor
   ansible.builtin.copy:
     dest: "{{ ansible_env.HOME }}/.nextflow/config"
+    backup: true
     mode: "0644"
     content: |
       executor {

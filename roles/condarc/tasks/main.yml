@@ -2,6 +2,7 @@
 - name: Configure conda/mamba channels
   ansible.builtin.copy:
     dest: "{{ ansible_env.HOME }}/.condarc"
+    backup: true
     mode: "0644"
     content: |
       channels:
