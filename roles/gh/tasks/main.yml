@@ -1,0 +1,45 @@
+---
+# gh ships as a tar.gz: download (sha256-checked), extract only the binary into ~/bin, drop the tarball.
+# The installed version is read first (read-only), so a pinned version bump reinstalls and reruns are changed=0.
+- name: Detect installed gh
+  ansible.builtin.command: "{{ ansible_env.HOME }}/bin/gh --version"
+  register: gh_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Install gh {{ gh_version }}
+  when:
+    - gh_version not in (gh_installed.stdout | default(''))
+    # --check on a fresh host: ~/bin does not exist yet
+    - not (common_bin is changed and ansible_check_mode)
+  block:
+    - name: Ensure ~/.cache exists
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.cache"
+        state: directory
+
+    - name: Download gh {{ gh_version }}
+      ansible.builtin.get_url:
+        url: "{{ gh_url }}"
+        checksum: "sha256:{{ gh_sha256 }}"
+        dest: "{{ ansible_env.HOME }}/.cache/gh.tar.gz"
+        mode: "0644"
+
+    - name: Extract the gh binary into ~/bin
+      ansible.builtin.unarchive:
+        src: "{{ ansible_env.HOME }}/.cache/gh.tar.gz"
+        dest: "{{ ansible_env.HOME }}/bin"
+        remote_src: true
+        extra_opts: ["--strip-components=2", "--wildcards", "*/bin/gh"]
+        mode: "0755"
+      # --check: the tarball was not downloaded
+      when: not ansible_check_mode
+
+    - name: Remove the gh tarball
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.cache/gh.tar.gz"
+        state: absent
+      when: not ansible_check_mode
+
+...

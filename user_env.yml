@@ -14,6 +14,10 @@
       tags: nextflow
     - role: jq
       tags: jq
+    - role: gh
+      tags: gh
+    - role: glow
+      tags: glow
     - role: gists
       tags: gists
     # last: the bash module configures micromamba/conda env variables and the PATH for what was installed above
