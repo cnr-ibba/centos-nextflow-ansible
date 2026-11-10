@@ -11,7 +11,7 @@ build:
 up: build
 	-docker rm -f $(IMAGE) >/dev/null 2>&1
 	docker run -d --name $(IMAGE) -p 127.0.0.1:$(PORT):22 \
-		-e AUTHORIZED_KEYS="$$(ssh-add -L 2>/dev/null || cat ~/.ssh/*.pub)" $(IMAGE)
+		-e AUTHORIZED_KEYS="$$( (ssh-add -L 2>/dev/null; cat ~/.ssh/*.pub) | grep -v -e -cert- )" $(IMAGE)
 
 down:
 	docker rm -f $(IMAGE)
