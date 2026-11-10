@@ -4,6 +4,7 @@
 # MAMBA_ROOT_PREFIX=$HOME/.conda). Environments are declared in
 # condapip_packages with absolute paths (e.g. "{{ ansible_env.HOME }}/.conda/envs/<name>").
 micromamba_version: 2.9.0-0   # mamba-org/micromamba-releases tag
+micromamba_sha256: 366cd9cd8be14df1ab8ed50352a82111082a36686b2d389fdb79a92c3fafb3e3
 micromamba_url: "https://github.com/mamba-org/micromamba-releases/releases/download/{{ micromamba_version }}/micromamba-linux-64"
 
 # Conda envs (created once by the condapip role, python minor pinned) and the tools pip-installed into them.
@@ -18,7 +19,7 @@ condapip_packages:
 # bunop/dotfiles: `bin/install bash` links ~/.bashrc, ~/.bash_profile (NXF_* variables, SDKMAN and
 # micromamba init), ~/.bash_aliases... The clone is not refreshed unless -e dotfiles_update=true
 dotfiles_repo: https://github.com/bunop/dotfiles.git
-dotfiles_version: cineca
+dotfiles_version: 8a8c9677c1dd625f425ba78ebebf74b75cafd435   # tip of branch `cineca`
 dotfiles_module: bash
 dotfiles_dest: "{{ ansible_env.HOME }}/dotfiles"
 dotfiles_update: false

@@ -4,7 +4,7 @@
 - name: Install micromamba {{ micromamba_version }}
   ansible.builtin.get_url:
     url: "{{ micromamba_url }}"
-    checksum: "sha256:{{ micromamba_url }}.sha256"
+    checksum: "sha256:{{ micromamba_sha256 }}"
     dest: "{{ ansible_env.HOME }}/bin/micromamba"
     mode: "0755"
   # --check on a fresh host: ~/bin does not exist yet, get_url would fail
