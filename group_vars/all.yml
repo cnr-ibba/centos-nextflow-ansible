@@ -1,32 +1,16 @@
 ---
 # micromamba instead of Miniforge/Miniconda: space in $HOME is limited.
 # The binary goes to $HOME/bin (the dotfiles export MAMBA_EXE=$HOME/bin/micromamba and
-# MAMBA_ROOT_PREFIX=$HOME/.conda). Environments must be declared with absolute paths
-# (e.g. "{{ ansible_env.HOME }}/.conda/envs/<name>") to match the role's `creates:` check.
+# MAMBA_ROOT_PREFIX=$HOME/.conda). Environments are declared in
+# condapip_packages with absolute paths (e.g. "{{ ansible_env.HOME }}/.conda/envs/<name>").
 micromamba_version: 2.9.0-0   # mamba-org/micromamba-releases tag
 micromamba_url: "https://github.com/mamba-org/micromamba-releases/releases/download/{{ micromamba_version }}/micromamba-linux-64"
 
-# galaxyproject.miniconda settings: it must find the binary installed by the micromamba role
-miniconda_distribution: micromamba
-miniconda_prefix: "{{ ansible_env.HOME }}"
-miniconda_installer_version: "{{ micromamba_version }}"
-miniconda_version: "{{ micromamba_version }}"
-# the binary comes from the micromamba role, never from the galaxy role's installer
-miniconda_install: false
-# self-update would report "changed" on every run
-miniconda_update: false
-
-# Conda envs (created once, python minor pinned) and the tools pip-installed into them by the condapip role.
+# Conda envs (created once by the condapip role, python minor pinned) and the tools pip-installed into them.
 # nf-core/tools is installed with pip, not conda, as in prod.
 nfcore_tools_version: 4.2.1
 csvkit_version: 2.2.0
-miniconda_conda_environments:
-  "{{ ansible_env.HOME }}/.conda/envs/nf-core":
-    channels: [conda-forge]
-    packages: [python=3.12, pip]
-  "{{ ansible_env.HOME }}/.conda/envs/csvkit":
-    channels: [conda-forge]
-    packages: [python=3.12, pip]
+conda_python: "3.12"
 condapip_packages:
   - {env: "{{ ansible_env.HOME }}/.conda/envs/nf-core", package: nf-core, version: "{{ nfcore_tools_version }}"}
   - {env: "{{ ansible_env.HOME }}/.conda/envs/csvkit", package: csvkit, version: "{{ csvkit_version }}"}

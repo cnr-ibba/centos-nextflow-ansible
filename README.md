@@ -92,19 +92,12 @@ File | Description
 roles/
 ├── common/             Sanity checks: ping, non-root user, writable $HOME
 ├── micromamba/         micromamba binary (get_url, sha256-checked) in ~/bin
-├── condapip/           pip-installs nf-core/tools and csvkit into their conda envs
+├── condapip/           creates the conda envs and pip-installs nf-core/tools and csvkit into their conda envs
 ├── condarc/            ~/.condarc (bioconda, conda-forge, nodefaults, strict priority)
 └── dotfiles/           bunop/dotfiles (branch cineca) cloned in ~/dotfiles, `bin/install bash`
-galaxy_roles/           Third-party roles from Ansible Galaxy, committed to the repo
-└── galaxyproject.miniconda/
 ```
 
-micromamba is used instead of Miniconda because space is limited. `galaxyproject.miniconda` finds the binary
-installed by the `micromamba` role and will be used to create conda environments. Roles in `galaxy_roles/` are listed in `requirements.yml` and installed with:
-
-```
-uv run ansible-galaxy role install -p galaxy_roles -r requirements.yml --force
-```
+micromamba is used instead of Miniconda because space is limited. The `condapip` role creates the conda environments with it.
 
 ### Tags
 
@@ -116,7 +109,6 @@ Role | Tags
 --- | ---
 common | check
 micromamba | micromamba
-galaxyproject.miniconda | miniconda
 condapip | condapip
 condarc | condarc
 dotfiles | dotfiles

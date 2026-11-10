@@ -1,5 +1,18 @@
 ---
-# pip-installs pinned tools into the conda envs created by galaxyproject.miniconda (same as done by hand in prod).
+# Creates the conda envs once with micromamba (no update step: envs are never touched again), then
+# pip-installs pinned tools into them (same as done by hand in prod).
+- name: Create the conda envs
+  ansible.builtin.command: >-
+    {{ ansible_env.HOME }}/bin/micromamba create --yes --channel conda-forge
+    --prefix {{ item.env }} python={{ conda_python }} pip
+  args:
+    creates: "{{ item.env }}"
+  environment:
+    MAMBA_ROOT_PREFIX: "{{ ansible_env.HOME }}/.conda"
+  loop: "{{ condapip_packages }}"
+  loop_control:
+    label: "{{ item.env }}"
+
 - name: Look for the pip of each conda env
   ansible.builtin.stat:
     path: "{{ item.env }}/bin/pip"
