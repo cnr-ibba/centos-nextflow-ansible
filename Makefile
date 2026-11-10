@@ -3,7 +3,7 @@ IMAGE := g100-test
 PORT  := 2222
 USERNAME = $(shell uv run ansible-inventory --host docker | python3 -c 'import json,sys; print(json.load(sys.stdin)["ansible_user"])')
 
-.PHONY: build up down ping
+.PHONY: build up down ping test
 
 build:
 	docker build -t $(IMAGE) --build-arg USERNAME=$(USERNAME) docker
@@ -18,3 +18,8 @@ down:
 
 ping:
 	uv run ansible docker -m ping
+
+# Idempotence: converge twice, the second run must report changed=0 and failed=0
+test: up
+	uv run ansible-playbook site.yml -l docker
+	uv run ansible-playbook site.yml -l docker | tee /dev/stderr | grep -E 'changed=0 .*failed=0' >/dev/null
