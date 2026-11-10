@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - run: uv sync --frozen
+
+      # make up copies ~/.ssh/*.pub into the container; ssh picks the default key
+      - name: Throwaway SSH key
+        run: ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519
+
+      # generic CI user: the real inventory.local.yml is git-ignored
+      - name: Local inventory
+        run: |
+          cp inventory.example.yml inventory.local.yml
+          sed -i 's/yourusername/ci/' inventory.local.yml
+
+      # build, converge twice, second run must be changed=0 failed=0
+      - run: make test
+
+      - name: Container logs
+        if: failure()
+        run: docker logs g100-test
