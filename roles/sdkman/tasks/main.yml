@@ -6,7 +6,7 @@
   register: sdkman_init
 
 - name: Install SDKMAN
-  ansible.builtin.shell: curl -fsSL "https://get.sdkman.io?ci=true&rcupdate=false" | bash
+  ansible.builtin.shell: set -o pipefail; curl -fsSL "https://get.sdkman.io?ci=true&rcupdate=false" | bash
   args:
     executable: /bin/bash
     creates: "{{ ansible_env.HOME }}/.sdkman/bin/sdkman-init.sh"
