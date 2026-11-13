@@ -33,6 +33,7 @@ Implemented:
 | `jq` | `get_url` of the static `jq-linux-amd64` binary (sha256-checked, pinned `jq_version`) into `~/bin`; needed by `squeue.sh`/`sacct.sh` |
 | `gh` | GitHub CLI: release tarball (sha256-checked, pinned `gh_version`) downloaded to `~/.cache`, only `bin/gh` extracted into `~/bin`, tarball removed; reinstalls when the pinned version differs from `gh --version`. Login (`gh auth login`) is per user, out of scope |
 | `glow` | same pattern as `gh` for the glow markdown viewer (pinned `glow_version`) |
+| `ripgrep` | same pattern as `gh` for ripgrep (static musl tarball, pinned `ripgrep_version`, only `rg` goes into `~/bin`) |
 | `gists` | clones the `bin_gists` (fix_permissions, squeue, sacct, rotate_stuff) once into `~/bin/<gist id>` and symlinks the script into `~/bin` (relative link, as in prod). **Exception to the pinning rule**: they track `master` with `update: false` and are refreshed by hand with `git pull` |
 | `condapip` | creates the conda envs once (`micromamba create`, no update step, `conda_python`) and `pip install`s pinned tools into them, both declared in `condapip_packages` (absolute path under `~/.conda/envs`; the dotfiles export `MAMBA_EXE=$HOME/bin/micromamba`, `MAMBA_ROOT_PREFIX=$HOME/.conda`): `nf-core` (nf-core/tools via pip, as in prod) and `csvkit`; list in `condapip_packages` |
 | `condarc` | `~/.condarc`: bioconda, conda-forge, nodefaults, strict priority. If the dotfiles ever ship `.condarc` too, drop one of the two |
