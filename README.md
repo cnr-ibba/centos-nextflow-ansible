@@ -4,7 +4,7 @@ User-level [Ansible](https://www.ansible.com/) playbook that configures the `$HO
 (target: CINECA Galileo100, "G100") to run [Nextflow](https://www.nextflow.io/) pipelines, following the
 [bioinfo-guidelines](https://bioinfo-guidelines.readthedocs.io) (Nextflow, SLURM and Conda sections).
 
-It sets up dotfiles, a micromamba/conda environment with `nf-core` and `csvkit` envs, `~/.condarc`, SDKMAN + Java and Nextflow.
+It sets up dotfiles, a micromamba/conda environment with `nf-core` and `csvkit` envs, `~/.condarc`, SDKMAN + Java, Nextflow, and a few tools in `~/bin` (`jq`, `gh`, `glow`, `rg`, helper scripts from gists).
 
 Principles:
 
@@ -94,6 +94,13 @@ roles/
 ├── micromamba/         micromamba binary (get_url, sha256-checked) in ~/bin
 ├── condapip/           creates the conda envs and pip-installs nf-core/tools and csvkit into their conda envs
 ├── condarc/            ~/.condarc (bioconda, conda-forge, nodefaults, strict priority)
+├── sdkman/             SDKMAN and the pinned Temurin Java
+├── nextflow/           Nextflow launcher (sha256-checked) in ~/bin and ~/.nextflow/config
+├── jq/                 jq static binary (sha256-checked) in ~/bin
+├── gh/                 GitHub CLI: only the binary from the release tarball, in ~/bin
+├── glow/               glow markdown viewer, same pattern as gh
+├── ripgrep/            ripgrep (`rg`), same pattern as gh
+├── gists/              helper scripts (fix_permissions, squeue, sacct, rotate_stuff) cloned from gists and symlinked in ~/bin
 └── dotfiles/           bunop/dotfiles (branch cineca) cloned in ~/dotfiles, `bin/install bash`
 ```
 
@@ -111,6 +118,13 @@ common | check
 micromamba | micromamba
 condapip | condapip
 condarc | condarc
+sdkman | sdkman
+nextflow | nextflow
+jq | jq
+gh | gh
+glow | glow
+ripgrep | ripgrep
+gists | gists
 dotfiles | dotfiles
 
 ## Copyright and license
